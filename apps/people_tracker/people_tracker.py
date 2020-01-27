@@ -13,7 +13,6 @@ CONF_GUESTS_NAME = 'guests_name'
 
 CONF_GUESTS = 'guests'
 
-SENSOR_OBJECT_ID = 'people_tracker'
 SENSOR_NAME = "People Tracker"
 
 LOG_ERROR = 'ERROR'
@@ -25,11 +24,16 @@ ATTRIBUTE_FRIENDLY_NAME = 'friendly_name'
 ATTRIBUTE_PEOPLE = 'people'
 ATTRIBUTE_COUNT = 'count'
 
+STATE_HOME = 'home'
+STATE_ON = 'on'
+
+STATES_HOME = [STATE_HOME, STATE_ON]
+
 APP_SCHEMA = vol.Schema({
     vol.Required(CONF_MODULE): str,
     vol.Required(CONF_CLASS): str,
     vol.Required(CONF_ENTITIES): [ str ],
-    vol.Optional(CONF_NAME, default=SENSOR_NAME): str,
+    vol.Optional(CONF_NAME): str,
     vol.Optional(CONF_GUESTS_NAME, default=CONF_GUESTS): str,
     vol.Optional(CONF_GUESTS_ENTITY): str,
     vol.Optional(CONF_AND, default=CONF_AND): str,
@@ -48,12 +52,13 @@ class PeopleTracker(hass.Hass):
         self.guest_entity_id = args.get(CONF_GUESTS_ENTITY)
         self._guest_name = args.get(CONF_GUESTS_NAME)
 
-        name = args.get(CONF_NAME)
+        name = args.get(CONF_NAME, SENSOR_NAME)
+        object_id = name.replace(' ','_').lower()
 
         self._and = args.get(CONF_AND)
         self._or = args.get(CONF_OR)
 
-        self._sensor = f"sensor.{SENSOR_OBJECT_ID}"
+        self._sensor = f"sensor.{object_id}"
 
         self.log(self.get_state(self.guest_entity_id, attribute='all'), level = self._level)
 
@@ -91,7 +96,7 @@ class PeopleTracker(hass.Hass):
 
     def track_person(self, entity, attribute, old, new, kwargs):
         name = self.clean_persons_name(entity)
-        if new in ['home']:
+        if new in STATES_HOME:
             self.add_person(name)
         else:
             self.remove_person(name)
@@ -177,7 +182,7 @@ class PeopleTracker(hass.Hass):
         for k, v in kwargs.items():
             attributes[k] = v
         
-        self.log(f"{self._sensor}: {state}, attributes={attributes}", self._level)
+        self.log(f"{self._sensor}: {state}, attributes={attributes}", level = self._level)
         
         self.set_state(self._sensor, state=state, attributes=attributes)
     
