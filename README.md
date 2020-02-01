@@ -23,7 +23,7 @@ Download the `people_tracker` directory from inside the `apps` directory here to
 #### Basic
 ```yaml
 # Monitors all events in INFO log level
-events:
+people_at_home:
   module: people_tracker
   class: PeopleTracker
   guest_entity_id: input_boolean.guests
@@ -35,7 +35,7 @@ events:
 #### Advanced
 ```yaml
 # Creates a sensor for Spanish, using 'y' for 'and' and 'o' for 'or'.
-events:
+people_at_home:
   module: people_tracker
   class: PeopleTracker
   guest_entity_id: input_boolean.invitados
