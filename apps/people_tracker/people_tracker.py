@@ -67,11 +67,11 @@ class PeopleTracker(hass.Hass):
         self.handles = []
 
         for entity_id in self.entities:
-            handle = self.listen_state(self.track_person, entity = entity_id)
+            handle = self.listen_state(self.track_person, entity_id = entity_id)
             self.handles.append(handle)
 
         if self.guest_entity_id:
-            handle = self.listen_state(self.track_guests, entity = self.guest_entity_id)
+            handle = self.listen_state(self.track_guests, entity_id = self.guest_entity_id)
             self.handles.append(handle)
 
         #Populate people on startup.
