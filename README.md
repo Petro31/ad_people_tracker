@@ -1,8 +1,70 @@
-# Home Assistant People Tracking Sensor
-
 [![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg?style=for-the-badge)](https://github.com/custom-components/hacs)
 <br><a href="https://www.buymeacoffee.com/Petro31" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-black.png" width="150px" height="35px" alt="Buy Me A Coffee" style="height: 35px !important;width: 150px !important;" ></a>
 
+
+# DEPRECATED - Use this setup instead
+
+### group 
+place in configuration.yaml
+```
+group
+  people:
+    entities:
+    - person.a
+    - person.b
+```
+
+
+### template 
+place in configuration.yaml
+```
+template:
+- sensor:
+  - unique_id: people_at_home
+    name: People at Home
+    state: >
+      {%- set people = expand('group.people') %}
+      {{ people | selectattr('state', 'in', ['home', 'on'] ) | list | count }}
+    icon: >
+      {%- set icons = ['account-off', 'account', 'account-multiple'] %}
+      {%- set people = expand('group.people') %}
+      {%- set cnt = people | selectattr('state', 'in', ['home', 'on'] ) | list | count %}
+      {%- if cnt >= 0 %}
+        mdi:{{ icons[cnt] if cnt in range(icons | count) else 'account-group' }}
+      {%- else %}
+        mdi:account-alert
+      {%- endif %}
+    attributes:
+      template: people_tracker
+      people: > 
+        {%- set people = expand('group.people') | selectattr('state', 'eq', 'home') | map(attribute='name') | list %}
+        {%- set company = expand('group.people') | selectattr('state', 'eq', 'on') | map(attribute='name') | list %}
+        {%- set people = people + company %}
+        {{ people }}
+      and: >
+        {%- set people = expand('group.people') | selectattr('state', 'eq', 'home') | map(attribute='name') | list %}
+        {%- set company = expand('group.people') | selectattr('state', 'eq', 'on') | map(attribute='name') | list %}
+        {%- set people = people + company %}
+        {%- if people | count > 0 %}
+          {{- [people[:-1] | join(', '), 'and', people[-1]] | join(' ') if people | count > 1 else people[0] }}
+        {%- else %}unknown
+        {%- endif %}
+      or: >
+        {%- set people = expand('group.people') | selectattr('state', 'eq', 'home') | map(attribute='name') | list %}
+        {%- set company = expand('group.people') | selectattr('state', 'eq', 'on') | map(attribute='name') | list %}
+        {%- set people = people + company %}
+        {%- if people | count > 0 %}
+          {{- [people[:-1] | join(', '), 'or', people[-1]] | join(' ') if people | count > 1 else people[0] }}
+        {%- else %}unknown
+        {%- endif %}
+      count: >
+        {%- set people = expand('group.people') | selectattr('state', 'eq', 'home') | map(attribute='name') | list %}
+        {%- set company = expand('group.people') | selectattr('state', 'eq', 'on') | map(attribute='name') | list %}
+        {%- set people = people + company %}
+        {{ people | count }}
+```
+
+# AppDaemon Home Assistant People Tracking Sensor
 _People Tracking Sesnor app for AppDaemon._
 
 Creates a sensor that tracks the number of people at home.  Also creates gramatically correct lists of formated names at home.
